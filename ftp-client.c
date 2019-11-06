@@ -40,28 +40,38 @@ main (int argc, char const *argv[])
 	} 
 
 	//port number 분리해주기. 
-	char *ptr = strtok(argv[2], ":");
+	char first[1024];
+	strcpy(first, argv[1]);
+
+	char *ptr = strtok(first, ":");
 	char args1[16]/*IP*/, args2[16]/*port #*/;
-	int i=0;
 	for(int i=0; i<2; i++){
-		strcpy(args1, ptr);
+		if(i==0){
+			strcpy(args1, ptr);
+		}
+		else if(i==1){
+			strcpy(args2, ptr);
+		}
 
 		if(ptr==NULL) { break; }
+		printf("%s\n", ptr);
 		ptr = strtok(NULL, ":");
 	}
 
 	memset(&serv_addr, '0', sizeof(serv_addr)); 
 	serv_addr.sin_family = AF_INET; 
 	serv_addr.sin_port = htons(atoi(args2)); 
-	if (inet_pton(AF_INET, argv[1], &serv_addr.sin_addr) <= 0) {
+	if (inet_pton(AF_INET, args1, &serv_addr.sin_addr) <= 0) {
 		perror("inet_pton failed : ") ; 
 		exit(EXIT_FAILURE) ;
 	} 
-
+	
+	printf("2\n");
 	if (connect(sock_fd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
 		perror("connect failed : ") ;
 		exit(EXIT_FAILURE) ;
 	}
+	printf("[CONNECT]\n");
 	// 연결됨!!!!! 서버랑 연결됨!!!!!1 
 	
 	data = cmdline ;

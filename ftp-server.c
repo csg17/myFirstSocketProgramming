@@ -23,7 +23,8 @@ void *worker (void * arg)
 
 	conn = *((int *)arg) ; // 이 정수가 가리키는 곳 의 정수를 conn에 넣는다. 
 	free(arg) ;
-
+	
+	printf("[WORKER IN]\n");
 	while ( (s = recv(conn, buf, 1023, 0)) > 0 ) {
 		buf[s] = 0x0 ;
 		if (data == 0x0) {
@@ -134,7 +135,12 @@ int main (int argc, char const *argv[])
 	char *ptr = strtok(first, ":");
 	char args1[16]/*IP*/, args2[16]/*port#*/;
 	for(int i=0; i<2; i++){
-		strcpy(args1, ptr);
+		if(i==0){
+			strcpy(args1, ptr);
+		}
+		else if(i==1){
+			strcpy(args2, ptr);
+		}
 
 		if(ptr==NULL) { break; }
 		printf("%s\n", ptr);
@@ -143,7 +149,8 @@ int main (int argc, char const *argv[])
 	memset(&address, '0', sizeof(address)); 
 
 	address.sin_family = AF_INET; 
-	address.sin_addr.s_addr = INADDR_ANY /* the localhost*/ ; 
+	address.sin_addr.s_addr = INADDR_ANY /* the localhost*/ ;
+	printf("[INADDR] %s\n", INADDR_ANY);
 	address.sin_port = htons(atoi(args2)); 
 
 	if (bind(listen_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
@@ -154,6 +161,7 @@ int main (int argc, char const *argv[])
 
     printf("It is bound\n");
 	while (1) {
+		printf("2\n");
 		if (listen(listen_fd, 16 /* the size of waiting queue*/) < 0) { 
 			perror("listen failed : "); 
 			exit(EXIT_FAILURE); 
