@@ -113,10 +113,10 @@ int main (int argc, char const *argv[])
 	int opt = 1; 
 	int addrlen = sizeof(address); 
 	
-	//if (argc != 2) {
-	//	fprintf(stderr, "Wrong number of arguments") ;
-	//	exit(EXIT_FAILURE) ;
-    //}
+	if (argc != 2) {
+		fprintf(stderr, "Wrong number of arguments") ;
+		exit(EXIT_FAILURE) ;
+    }
 
 	char buffer[1024] = {0}; 
 
@@ -127,17 +127,32 @@ int main (int argc, char const *argv[])
 		exit(EXIT_FAILURE); 
 	}
 	
+	//port number 분리해주기. 
+	char first[1024];
+	strcpy(first, argv[1]);
+
+	char *ptr = strtok(first, ":");
+	char args1[16]/*IP*/, args2[16]/*port#*/;
+	for(int i=0; i<2; i++){
+		strcpy(args1, ptr);
+
+		if(ptr==NULL) { break; }
+		printf("%s\n", ptr);
+		ptr = strtok(NULL, ":");
+	}
 	memset(&address, '0', sizeof(address)); 
+
 	address.sin_family = AF_INET; 
 	address.sin_addr.s_addr = INADDR_ANY /* the localhost*/ ; 
-	address.sin_port = htons(atoi(argv[1])); 
+	address.sin_port = htons(atoi(args2)); 
 
 	if (bind(listen_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
 		perror("bind failed : "); 
 		exit(EXIT_FAILURE); 
 	} 
 
-    printf("[SERVER IN]\n");
+
+    printf("It is bound\n");
 	while (1) {
 		if (listen(listen_fd, 16 /* the size of waiting queue*/) < 0) { 
 			perror("listen failed : "); 

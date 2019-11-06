@@ -8,6 +8,7 @@
 int 
 main (int argc, char const *argv[]) 
 { 
+	// ./client 127.0.0.0:8090 get a.txt ||  ./client 127.0.0.0:8090 list
 	struct sockaddr_in serv_addr; 
 	int sock_fd ;
 	int s, len ;
@@ -17,10 +18,10 @@ main (int argc, char const *argv[])
 	char * cmdline ; // 'list' or 'get'
 	char * filename ;
 
-	if (argc == 4 && strcmp(argv[3], "list") == 0) {
+	if (argc == 3 && strcmp(argv[2], "list") == 0) {
 		cmdline = strdup("#list") ;
 	}
-	else if (argc == 5 && strcmp(argv[3], "get") == 0) {
+	else if (argc == 4 && strcmp(argv[3], "get") == 0) {
 		cmdline = strdup(argv[4]) ; //파일 명을 보내주네요..
 	}
 	else {
@@ -38,9 +39,20 @@ main (int argc, char const *argv[])
 		exit(EXIT_FAILURE) ;
 	} 
 
+	//port number 분리해주기. 
+	char *ptr = strtok(argv[2], ":");
+	char args1[16]/*IP*/, args2[16]/*port #*/;
+	int i=0;
+	for(int i=0; i<2; i++){
+		strcpy(args1, ptr);
+
+		if(ptr==NULL) { break; }
+		ptr = strtok(NULL, ":");
+	}
+
 	memset(&serv_addr, '0', sizeof(serv_addr)); 
 	serv_addr.sin_family = AF_INET; 
-	serv_addr.sin_port = htons(atoi(argv[2])); 
+	serv_addr.sin_port = htons(atoi(args2)); 
 	if (inet_pton(AF_INET, argv[1], &serv_addr.sin_addr) <= 0) {
 		perror("inet_pton failed : ") ; 
 		exit(EXIT_FAILURE) ;
