@@ -71,37 +71,37 @@ void *worker (void * arg)
 		}
 	}
 	// 받은 명령이 겟이면, data에 보내야 할 파일이름 있음. 
-	else if(strcmp(data, "get")==0)/* get file */ {
+	else/* get file */ {
 		FILE *fp;
         char buffer[1024];
-        fp = fopen(data, "rb");
+        fp = fopen(data, "r");
 
         if(fp == NULL){
             printf("File not found\n");
             //return 1;
-            return 0x0;
+            exit(1);
         }
-        else{
+        
             printf("Found file!!\n");
 
             //////read data into buffer
             bzero(buffer, 1024);
             int R;
-            while((R = fread(buffer, sizeof(char), sizeof(buffer), fp)>0)){
-                if(send(/*thread생성 시 파라미터로 new_socket보내줌 그거 conn으로 받음*/conn, buffer, R, 0)){
+
+            //while((R = fread(buffer, sizeof(char), 1023, fp)>0)){
+            for(int i=0; i<sizeof(buffer); i++){ 
+				R = fread(buffer, sizeof(char), 1023, fp);
+
+				if(send(conn, buffer, R, 0)<0){
                     printf("ERROR\n");
                     exit(1);
                 }
-                bzero(buffer, 1024);
             }
             // 확인 ㄱ
             printf("Ok sent to client!! :)\n");
             close(conn);
             printf("[Server] Connection with Client closed. \n");
         }
-
-
-	}
 
 	shutdown(conn, SHUT_WR) ;
 	return 0x0 ;
@@ -150,8 +150,9 @@ int main (int argc, char const *argv[])
 
 	address.sin_family = AF_INET; 
 	address.sin_addr.s_addr = INADDR_ANY /* the localhost*/ ;
-	printf("[INADDR] %s\n", INADDR_ANY);
-	address.sin_port = htons(atoi(args2)); 
+	//printf("[INADDR] %s\n", INADDR_ANY);
+	//address.sin_port = htons(atoi(args2)); 
+	address.sin_port = htons(9013); 
 
 	if (bind(listen_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
 		perror("bind failed : "); 
@@ -161,7 +162,6 @@ int main (int argc, char const *argv[])
 
     printf("It is bound\n");
 	while (1) {
-		printf("2\n");
 		if (listen(listen_fd, 16 /* the size of waiting queue*/) < 0) { 
 			perror("listen failed : "); 
 			exit(EXIT_FAILURE); 
